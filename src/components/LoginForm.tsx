@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LockKeyhole } from "lucide-react";
+import { toast } from "sonner";
 
 interface LoginFormProps {
   onLogin: (password: string) => Promise<boolean>;
@@ -13,10 +14,23 @@ interface LoginFormProps {
 
 const LoginForm = ({ onLogin, onResetClick, isLoading }: LoginFormProps) => {
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onLogin(password);
+    setError("");
+    console.log("Attempting login with password:", password);
+    
+    try {
+      const success = await onLogin(password);
+      if (!success) {
+        setError("Invalid password. Please try again.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An error occurred during login");
+      toast.error("Login failed");
+    }
   };
 
   return (
@@ -43,6 +57,9 @@ const LoginForm = ({ onLogin, onResetClick, isLoading }: LoginFormProps) => {
                   required
                   autoFocus
                 />
+                {error && (
+                  <p className="text-sm text-red-500">{error}</p>
+                )}
               </div>
             </div>
           </CardContent>

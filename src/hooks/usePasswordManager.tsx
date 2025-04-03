@@ -111,6 +111,8 @@ export const usePasswordManager = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     try {
       const isValid = await mockApi.checkMasterPassword(password);
+      console.log("Login attempt with password:", password, "Valid:", isValid);
+      
       if (isValid) {
         setState(prev => ({ ...prev, isAuthenticated: true, isLoading: false }));
         toast.success("Login successful");
@@ -121,6 +123,7 @@ export const usePasswordManager = () => {
         return false;
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast.error("Login failed");
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
