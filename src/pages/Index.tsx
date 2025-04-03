@@ -43,7 +43,11 @@ const Index = () => {
   };
 
   const handleRecovery = async (key: string) => {
-    return await recoverAccount(key);
+    const success = await recoverAccount(key);
+    if (success) {
+      setShowRecoveryForm(false);
+    }
+    return success;
   };
 
   // Handle authentication state and render the appropriate component
@@ -95,7 +99,14 @@ const Index = () => {
         
         <RecoveryKeyModal
           isOpen={showRecoveryKeyModal}
-          onClose={() => setShowRecoveryKeyModal(false)}
+          onClose={() => {
+            setShowRecoveryKeyModal(false);
+            // After closing the recovery key modal, redirect to login page
+            if (!isAuthenticated) {
+              // This ensures user goes to login after setting a new password via recovery
+              window.location.reload();
+            }
+          }}
           recoveryKey={recoveryKey}
         />
       </div>

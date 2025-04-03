@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound } from "lucide-react";
+import { toast } from "sonner";
 
 interface RecoveryFormProps {
   onRecovery: (key: string) => Promise<boolean>;
@@ -13,10 +14,21 @@ interface RecoveryFormProps {
 
 const RecoveryForm = ({ onRecovery, onBackToLogin, isLoading }: RecoveryFormProps) => {
   const [recoveryKey, setRecoveryKey] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onRecovery(recoveryKey);
+    setError("");
+    
+    try {
+      const success = await onRecovery(recoveryKey);
+      if (!success) {
+        setError("Invalid recovery key. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during recovery.");
+      console.error("Recovery error:", err);
+    }
   };
 
   return (
@@ -42,6 +54,9 @@ const RecoveryForm = ({ onRecovery, onBackToLogin, isLoading }: RecoveryFormProp
                   required
                   autoFocus
                 />
+                {error && (
+                  <p className="text-sm text-red-500">{error}</p>
+                )}
               </div>
             </div>
           </CardContent>

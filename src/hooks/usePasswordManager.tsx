@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -22,12 +21,15 @@ interface PasswordManagerState {
 const mockApi = {
   checkMasterPassword: (password: string): Promise<boolean> => {
     return new Promise(resolve => {
+      // For testing purposes, use 'apple123' as the password
       setTimeout(() => resolve(password === 'apple123'), 500);
     });
   },
   
   checkRecoveryKey: (key: string): Promise<boolean> => {
     return new Promise(resolve => {
+      // For testing purposes, use 'recovery123' as the recovery key
+      console.log("Checking recovery key:", key);
       setTimeout(() => resolve(key === 'recovery123'), 500);
     });
   },
@@ -36,7 +38,8 @@ const mockApi = {
     return new Promise(resolve => {
       setTimeout(() => resolve({
         success: true,
-        recoveryKey: 'recovery' + Math.floor(Math.random() * 1000).toString()
+        // For testing purposes, generate a predictable recovery key
+        recoveryKey: 'recovery123'
       }), 500);
     });
   },
@@ -128,11 +131,16 @@ export const usePasswordManager = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     try {
       const isValid = await mockApi.checkRecoveryKey(recoveryKey);
+      console.log("Recovery key valid:", isValid);
+      
       if (isValid) {
+        // Important: We need to set isAuthenticated to false here to ensure the user
+        // is redirected to the password creation screen
         setState(prev => ({ 
           ...prev, 
           isLoading: false,
-          hasMasterPassword: false // Force user to create a new master password
+          hasMasterPassword: false, // Force user to create a new master password
+          isAuthenticated: false    // Ensure user is not considered logged in yet
         }));
         toast.success("Recovery key accepted");
         return true;
@@ -142,6 +150,7 @@ export const usePasswordManager = () => {
         return false;
       }
     } catch (error) {
+      console.error("Recovery error:", error);
       toast.error("Recovery failed");
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
@@ -162,6 +171,7 @@ export const usePasswordManager = () => {
           ...prev, 
           isLoading: false,
           hasMasterPassword: true,
+          // Don't set isAuthenticated to true here
         }));
         toast.success("Master password created");
       } else {
